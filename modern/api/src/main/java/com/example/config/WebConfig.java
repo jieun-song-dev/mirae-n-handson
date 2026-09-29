@@ -2,6 +2,7 @@ package com.example.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -12,6 +13,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     static final String WEB_DEV_ORIGIN = "http://localhost:5173";
+    static final String LEGACY_SEARCH_PATH = "/search.php";
+    static final String ITEM_SEARCH_PATH = "/api/items/search";
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -20,5 +23,12 @@ public class WebConfig implements WebMvcConfigurer {
             .allowedMethods("GET")
             .allowCredentials(false)
             .maxAge(3600);
+    }
+
+    /** 문항 검색 — 레거시 경로(이관 전 테스트가 먼저 두드림)와 새 경로 모두에 요청 줄 길이 제한(414)을 건다. */
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new RequestLineLimitInterceptor())
+            .addPathPatterns(LEGACY_SEARCH_PATH, ITEM_SEARCH_PATH);
     }
 }

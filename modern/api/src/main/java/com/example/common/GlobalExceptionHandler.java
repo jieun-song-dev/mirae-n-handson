@@ -44,6 +44,17 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, "요청 값이 올바르지 않습니다", request);
     }
 
+    /**
+     * 레거시(Apache)의 414 와 같게 응답한다. 레거시 414 응답에는 안내 문구가 없으므로 {@code message} 를 비운다
+     * (동작 보존 테스트의 정규화 결과 {@code message: null} 과 맞춤).
+     */
+    @ExceptionHandler(RequestLineTooLongException.class)
+    public ResponseEntity<ErrorResponse> handleRequestLineTooLong(
+            RequestLineTooLongException ex, HttpServletRequest request) {
+        log.info("request line too long: {} ({})", ex.getMessage(), request.getRequestURI());
+        return build(HttpStatus.URI_TOO_LONG, null, request);
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponse> handleConflict(IllegalStateException ex, HttpServletRequest request) {
         log.warn("state conflict: {} ({})", ex.getMessage(), request.getRequestURI());

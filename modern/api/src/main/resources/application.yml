@@ -27,6 +27,9 @@ spring:
 
 server:
   port: 8080
+  # 문항 검색 이관: 레거시(Apache)처럼 긴 요청 줄에 414 를 주려면 요청이 Tomcat 을 통과해야 한다
+  # (Tomcat 기본 8KB 를 넘으면 400). 414 판정은 config/RequestLineLimitInterceptor 가 한다.
+  max-http-request-header-size: 32KB
 
 logging:
   level:
