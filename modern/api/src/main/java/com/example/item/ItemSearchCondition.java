@@ -1,5 +1,6 @@
 package com.example.item;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -47,6 +48,8 @@ public record ItemSearchCondition(
     private static final Pattern PHP_NUMERIC_PREFIX =
         Pattern.compile("^[ \t\n\r\u000B\f]*([+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?)");
     private static final Pattern PHP_INTEGER = Pattern.compile("[+-]?[0-9]+");
+    private static final BigInteger LONG_MAX = BigInteger.valueOf(Long.MAX_VALUE);
+    private static final BigInteger LONG_MIN = BigInteger.valueOf(Long.MIN_VALUE);
     /** PHP {@code trim()} 기본 대상 문자: 공백 · 탭 · 개행 · 복귀 · NUL · 수직 탭. */
     private static final String PHP_TRIM_CHARS = " \t\n\r\0\u000B";
 
@@ -160,11 +163,14 @@ public record ItemSearchCondition(
         }
         String number = matcher.group(1);
         if (PHP_INTEGER.matcher(number).matches()) {
-            try {
-                return Long.parseLong(number);
-            } catch (NumberFormatException overflow) {
-                return number.startsWith("-") ? Long.MIN_VALUE : Long.MAX_VALUE;
+            BigInteger integer = new BigInteger(number);
+            if (integer.compareTo(LONG_MAX) > 0) {
+                return Long.MAX_VALUE;
             }
+            if (integer.compareTo(LONG_MIN) < 0) {
+                return Long.MIN_VALUE;
+            }
+            return integer.longValue();
         }
         double parsed = Double.parseDouble(number);
         if (Double.isNaN(parsed) || Double.isInfinite(parsed)) {
