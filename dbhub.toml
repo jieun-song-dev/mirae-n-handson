@@ -1,0 +1,9 @@
+[[sources]]
+id = "default"
+dsn = "${DB_DSN}"
+
+[[tools]]
+name = "execute_sql"
+source = "default"
+readonly = true
+max_rows = 1000

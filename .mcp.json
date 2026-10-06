@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "dbhub": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@bytebase/dbhub@1.3.1", "--transport", "stdio", "--config", "${CLAUDE_PROJECT_DIR:-.}/dbhub.toml"],
+      "env": {
+        "DB_DSN": "${DB_DSN}"
+      }
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_PAT}",
+        "X-MCP-Toolsets": "repos,issues",
+        "X-MCP-Readonly": "true"
+      }
+    },
+    "item-bank": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${CLAUDE_PROJECT_DIR:-.}/mcp-skeleton/build/index.js"]
+    }
+  }
+}
