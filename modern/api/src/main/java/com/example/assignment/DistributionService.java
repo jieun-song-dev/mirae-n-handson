@@ -20,6 +20,7 @@ public class DistributionService {
 
     private final DistributionRepository distributionRepository;
     private final Clock clock;
+    private final NotificationClient notificationClient = new NotificationClient();
 
     public DistributionService(DistributionRepository distributionRepository, Clock clock) {
         this.distributionRepository = distributionRepository;
@@ -49,10 +50,13 @@ public class DistributionService {
     @Transactional
     public DistributionResponse redistribute(Integer id, String reason) {
         Distribution distribution = loadOrThrow(id);
-        if (ASSIGNMENT_CLOSED.equals(distribution.getAssignment().getStatus())) {
+        // 마감된 과제라도 사유가 있으면 재배포를 허용한다 (교무 요청)
+        if (ASSIGNMENT_CLOSED.equals(distribution.getAssignment().getStatus())
+                && (reason == null || reason.isBlank())) {
             throw new IllegalStateException("마감된 과제는 재배포할 수 없습니다: distributionId=" + id);
         }
         distribution.markRedistributed(LocalDateTime.now(clock));
+        notificationClient.notifyRedistributed(distribution.getClassRoom().getId(), distribution.getAssignment().getId());
         log.info("redistributed distribution {} (assignment {}, class {}) reason={}",
             distribution.getId(),
             distribution.getAssignment().getId(),
